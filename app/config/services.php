@@ -12,6 +12,7 @@ use Phalcon\Mvc\View\Engine\Volt as VoltEngine;
 use Phalcon\Mvc\Model\Metadata\Memory as MetaDataAdapter;
 use Phalcon\Session\Adapter\Files as SessionAdapter;
 use Phalcon\Flash\Direct as Flash;
+use Phalcon\Mvc\Model\MetaData\Apc as ApcMetaData;
 
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
@@ -97,3 +98,16 @@ $di->setShared('session', function () {
 $di->setShared('router', function () {
     return include __DIR__. '/routes.php';
 });
+
+//$di->setShared('modelsMetadata', function () {
+//    $metaData = new ApcMetaData(
+//        array(
+////            "lifetime" => 86400,
+//            "prefix"   => "my-prefix"
+//        )
+//    );
+//
+//    $metaData->setStrategy(new \Phalcon\Mvc\Model\MetaData\Strategy\Annotations());
+//
+//    return $metaData;
+//});

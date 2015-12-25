@@ -2,7 +2,10 @@
 
 namespace App\Controllers;
 
-use App\Models\Books;
+use App\Models\BookInstance;
+use App\Models\Book;
+use Phalcon\Db\Adapter\Pdo\Mysql;
+use Phalcon\Http\Response;
 
 /**
  * @RoutePrefix("/api/books")
@@ -12,11 +15,11 @@ class BooksController extends ControllerBase
     /**
      * @Get("/")
      *
-     * @return \Phalcon\Http\Response
+     * @return Response
      */
     public function indexAction()
     {
-        $response = new \Phalcon\Http\Response();
+        $response = new Response();
 
         return $response->setJsonContent(['some_key' => 1]);
     }
@@ -26,14 +29,36 @@ class BooksController extends ControllerBase
      *
      * @param $id
      *
-     * @return \Phalcon\Http\Response
+     * @return Response
      */
     public function viewAction($id)
     {
-        $test = new Books();
-        $response = new \Phalcon\Http\Response();
+        $book = new Book();
+        $book->setName('name');
+        $book->setDescription('description');
+        $book->save();
 
-        return $response->setJsonContent(['some_key' => $id]);
+        $bookInstanceNew = new BookInstance();
+        $bookInstanceNew->setBookId($book->getId());
+
+        var_dump($book->getMessages());
+        var_dump($bookInstanceNew->getMessages());
+
+
+        /** @var Book $book */
+        $book = Book::findFirst(1);
+
+        /** @var BookInstance $bookInstance */
+        foreach ($book->getBookInstances() as $bookInstance) {
+            var_dump($bookInstance->getId());
+            var_dump($bookInstance->getBook()->getId());
+        }
+
+        throw new \Exception();
+
+        $response = new Response();
+
+        return $response->setJsonContent($book);
     }
 }
 
