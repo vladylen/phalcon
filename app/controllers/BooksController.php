@@ -200,37 +200,5 @@ class BooksController extends ControllerBase
             ]
         );
     }
-
-    public function someAction()
-    {
-        $book = new Book();
-        $book->setName('name');
-        $book->setDescription('description');
-        $book->save();
-        $user = new User();
-        $user->setName('name');
-        $user->setEmail('test@email.com');
-        $user->save();
-
-        var_dump($book->getMessages());
-        var_dump($user->getMessages());
-
-        /** @var Book $book */
-        /** @var User $user */
-        $book            = Book::findFirst(1);
-        $user            = User::findFirst(1);
-        $bookInstanceNew = new BookInstance();
-        $book->addBookInstance($bookInstanceNew);
-        $book->save();
-        $user->addBookInstance($bookInstanceNew);
-        $user->save();
-
-        foreach ($book->getBookInstances() as $bookInstance) {
-            var_dump($bookInstance->getId());
-            var_dump($bookInstance->getBook()->getId());
-        }
-
-        throw new \Exception();
-    }
 }
 
