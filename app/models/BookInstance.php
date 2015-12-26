@@ -24,7 +24,7 @@ class BookInstance extends BaseModel
 
         $this->setSource('book_instances');
         $this->belongsTo('book_id', "App\\Models\\Book", 'id', ["alias" => "book"]);
-//        $this->belongsTo('user_id', "App\\Models\\User", 'id');
+        $this->belongsTo('user_id', "App\\Models\\User", 'id', ["alias" => "user"]);
     }
 
     /**
