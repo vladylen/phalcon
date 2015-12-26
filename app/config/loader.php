@@ -7,7 +7,8 @@ $loader = new \Phalcon\Loader();
  */
 $loader->registerNamespaces(
     [
-        "App\\Controllers" => $config->application->controllersDir,
-        "App\\Models"      => $config->application->modelsDir
+        "App\\Controllers"        => $config->application->controllersDir,
+        "App\\Models"             => $config->application->modelsDir,
+        "App\\Models\\Behaviours" => $config->application->behavioursDir
     ]
 )->register();

@@ -4,7 +4,7 @@ namespace App\Models;
 
 /**
  * @property Book book
- * @method getBook
+ * @method Book getBook
  */
 class BookInstance extends BaseModel
 {

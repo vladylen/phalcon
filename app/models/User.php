@@ -2,14 +2,12 @@
 
 namespace App\Models;
 
-use Phalcon\Mvc\Model\Resultset;
+use App\Models\Behaviours\HasBookInstances;
 
-/**
- * @property BookInstance[]|Resultset bookInstances
- * @method getBookInstances
- */
 class User extends BaseModel
 {
+    use HasBookInstances;
+
     /**
      * @var string
      */
@@ -58,35 +56,5 @@ class User extends BaseModel
     public function setEmail($email)
     {
         $this->email = $email;
-    }
-
-    /**
-     * @param BookInstance $newBookInstance
-     */
-    public function addBookInstance(BookInstance $newBookInstance)
-    {
-        $isNew = true;
-
-        if (!is_null($newBookInstance->getId())) {
-            foreach ($this->bookInstances as $bookInstance) {
-                if ($bookInstance->getId() === $newBookInstance->getId()) {
-                    $isNew = false;
-                    break;
-                }
-            }
-        }
-
-        if ($isNew === true) {
-            $this->bookInstances = $newBookInstance;
-        }
-    }
-
-    /**
-     * @param BookInstance[]|null $bookInstances
-     */
-    public function setBookInstances(array $bookInstances = null)
-    {
-        $this->bookInstances->delete();
-        $this->bookInstances = $bookInstances;
     }
 }
