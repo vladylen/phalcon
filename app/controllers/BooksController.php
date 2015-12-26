@@ -6,7 +6,7 @@ use App\Models\Book;
 use App\Models\BookInstance;
 use App\Models\User;
 use Phalcon\Http\Response;
-use Phalcon\Mvc\Model\Query\StatusInterface;
+use Phalcon\Mvc\ModelInterface;
 
 /**
  * @RoutePrefix("/api/books")
@@ -20,17 +20,16 @@ class BooksController extends ControllerBase
      */
     public function indexAction()
     {
-        $phql  = /** @lang text */
-            "SELECT * FROM App\\Models\\Book ORDER BY name";
-        $books = $this->modelsManager->executeQuery($phql);
+        /** @var Book[] $books */
+        $books = Book::find();
 
         $response = new Response();
 
         $data = [];
         foreach ($books as $book) {
             $data[] = [
-                'id'   => $book->id,
-                'name' => $book->name
+                'id'   => $book->getId(),
+                'name' => $book->getName()
             ];
         }
 
@@ -46,15 +45,8 @@ class BooksController extends ControllerBase
      */
     public function searchAction($name)
     {
-        $phql  = /** @lang text */
-            "SELECT * FROM App\\Models\\Book WHERE name LIKE :name: ORDER BY name";
         /** @var Book[] $books */
-        $books = $this->modelsManager->executeQuery(
-            $phql,
-            [
-                'name' => '%' . $name . '%'
-            ]
-        );
+        $books = Book::find(["name LIKE '%$name%'"]);
 
         $response = new Response();
 
@@ -78,12 +70,8 @@ class BooksController extends ControllerBase
      */
     public function viewAction($id)
     {
-        $phql = /** @lang text */
-            "SELECT * FROM App\\Models\\Book WHERE id = :id:";
-        /** @var \Phalcon\Mvc\Model\Resultset $result */
         /** @var Book $book */
-        $result = $this->modelsManager->executeQuery($phql, ['id' => $id]);
-        $book   = $result->getFirst();
+        $book = Book::findFirst(['id' => $id]);
 
         $response = new Response();
 
@@ -111,34 +99,24 @@ class BooksController extends ControllerBase
      */
     public function addAction()
     {
-        $book = $this->request->getJsonRawBody();
+        $bookData = $this->request->getJsonRawBody();
 
-        $phql = /** @lang text */
-            "INSERT INTO App\\Models\\Book (name, description) VALUES (:name:, :description:)";
-
-        /** @var StatusInterface $status */
-        $status = $this->modelsManager->executeQuery(
-            $phql,
-            [
-                'name'        => $book->name,
-                'description' => $book->description,
-            ]
-        );
+        $book = new Book();
+        $book->setName($bookData->name);
+        $book->setDescription($bookData->description);
 
         $response = new Response();
 
-        if ($status->success() === true) {
-            $book->id = $status->getModel()->id;
-
+        if ($book->save() === true) {
             $response->setStatusCode(201, "Created");
             $response->setJsonContent(
                 [
                     'status' => 'OK',
-                    'data'   => $book
+                    'data'   => $book->getId()
                 ]
             );
         } else {
-            $this->createErrorResponse($response, $status);
+            $this->createErrorResponse($response, $book);
         }
 
         return $response;
@@ -153,30 +131,23 @@ class BooksController extends ControllerBase
      */
     public function updateAction($id)
     {
-        $book = $this->request->getJsonRawBody();
+        $bookData = $this->request->getJsonRawBody();
 
-        $phql = /** @lang text */
-            "UPDATE App\\Models\\Book SET name = :name:, description = :description: WHERE id = :id:";
-        /** @var StatusInterface $status */
-        $status = $this->modelsManager->executeQuery(
-            $phql,
-            [
-                'id'          => $id,
-                'name'        => $book->name,
-                'description' => $book->description,
-            ]
-        );
+        /** @var Book $book */
+        $book = Book::findFirst(['id' => $id]);
+        $book->setName($bookData->name);
+        $book->setDescription($bookData->description);
 
         $response = new Response();
 
-        if ($status->success() == true) {
+        if ($book->save() === true) {
             $response->setJsonContent(
                 [
                     'status' => 'OK'
                 ]
             );
         } else {
-            $this->createErrorResponse($response, $status);
+            $this->createErrorResponse($response, $book);
         }
 
         return $response;
@@ -191,41 +162,34 @@ class BooksController extends ControllerBase
      */
     public function deleteAction($id)
     {
-        $phql = /** @lang text */
-            "DELETE FROM App\\Models\\Book WHERE id = :id:";
-        /** @var StatusInterface $status */
-        $status = $this->modelsManager->executeQuery(
-            $phql,
-            [
-                'id' => $id
-            ]
-        );
+        /** @var Book $book */
+        $book = Book::findFirst(['id' => $id]);
 
         $response = new Response();
 
-        if ($status->success() == true) {
+        if ($book->delete() === true) {
             $response->setJsonContent(
                 [
                     'status' => 'OK'
                 ]
             );
         } else {
-            $this->createErrorResponse($response, $status);
+            $this->createErrorResponse($response, $book);
         }
 
         return $response;
     }
 
     /**
-     * @param Response        $response
-     * @param StatusInterface $status
+     * @param Response       $response
+     * @param ModelInterface $book
      */
-    private function createErrorResponse(Response $response, StatusInterface $status)
+    private function createErrorResponse(Response $response, ModelInterface $book)
     {
         $response->setStatusCode(409, "Conflict");
 
         $errors = [];
-        foreach ($status->getMessages() as $message) {
+        foreach ($book->getMessages() as $message) {
             $errors[] = $message->getMessage();
         }
 
