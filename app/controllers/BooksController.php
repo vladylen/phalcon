@@ -71,12 +71,12 @@ class BooksController extends ControllerBase
     public function viewAction($id)
     {
         /** @var Book $book */
-        $book = Book::findFirst(['id' => $id]);
+        $book = Book::findFirst(["id='$id'"]);
 
         $response = new Response();
 
         if ($book === false) {
-            $response->setJsonContent(['status' => 'NOT-FOUND']);
+            $this->createNotFoundResponse($response);
         } else {
             $response->setJsonContent(
                 [
@@ -131,14 +131,18 @@ class BooksController extends ControllerBase
      */
     public function updateAction($id)
     {
+        $response = new Response();
         $bookData = $this->request->getJsonRawBody();
 
         /** @var Book $book */
-        $book = Book::findFirst(['id' => $id]);
+        $book = Book::findFirst(["id='$id'"]);
+
+        if ($book === false) {
+            return $this->createNotFoundResponse($response);
+        }
+
         $book->setName($bookData->name);
         $book->setDescription($bookData->description);
-
-        $response = new Response();
 
         if ($book->save() === true) {
             $response->setJsonContent(
@@ -162,10 +166,14 @@ class BooksController extends ControllerBase
      */
     public function deleteAction($id)
     {
-        /** @var Book $book */
-        $book = Book::findFirst(['id' => $id]);
-
         $response = new Response();
+
+        /** @var Book $book */
+        $book = Book::findFirst(["id='$id'"]);
+
+        if ($book === false) {
+            return $this->createNotFoundResponse($response);
+        }
 
         if ($book->delete() === true) {
             $response->setJsonContent(
@@ -176,6 +184,19 @@ class BooksController extends ControllerBase
         } else {
             $this->createErrorResponse($response, $book);
         }
+
+        return $response;
+    }
+
+    /**
+     * @param Response $response
+     *
+     * @return Response
+     */
+    private function createNotFoundResponse(Response $response)
+    {
+        $response->setStatusCode(404);
+        $response->setJsonContent(['status' => 'NOT-FOUND']);
 
         return $response;
     }
