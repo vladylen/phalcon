@@ -5,6 +5,7 @@ error_reporting(E_ALL);
 define('APP_PATH', realpath(__DIR__ . '/..'));
 
 try {
+    require APP_PATH . "/vendor/autoload.php";
 
     /**
      * Read the configuration

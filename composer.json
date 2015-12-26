@@ -1,0 +1,6 @@
+{
+    "require": {
+        "phpunit/phpunit": "^4.8",
+        "fzaninotto/faker": "^1.5"
+    }
+}
